@@ -1,0 +1,58 @@
+/***** Dhrumil Patel ( Dpate85 ) *****/
+
+/* Framing up stack (%ebp) and (%esp) */
+        .pos 0                   /* Execution begins at address 0 */
+init:
+        irmovl Stack, %esp
+        irmovl ele1, %ecx
+	irmovl Stack, %ebp
+        jmp Main
+
+/* Sample input for testing the program */
+# Sample linked list
+.align 4
+ele1:
+        .long 0x0000a
+        .long ele2
+ele2:
+        .long 0x000b0
+        .long ele3
+ele3:
+        .long 0x00c00
+        .long 0
+
+/* Pushing the elements and calling sum list */
+Main:
+        pushl %esp
+	pushl %ebp
+	pushl %ecx
+        call rsum_list      /* invokes the rsum_list function */
+        halt                /* halts the program */
+
+/* Function for adding the elements recursively*/
+rsum_list:	
+        xorl    %eax,%eax               /* Sets val = 0 */ 
+        pushl   %ebp	
+	rrmovl 	%esp,%ebp		/* Pointer to frame */
+        pushl   %edx                  
+	mrmovl 	8(%ebp),%ecx 		/* Stores ele1 in %ecx */
+	andl   	%ecx,%ecx		
+	je     	End			/* If no elements are found, jumps to End: */
+	mrmovl 	(%ecx),%edx		/* %edx = ls */      	
+	mrmovl 	4(%ecx),%ecx 		/* %ecx = ls->next */
+	pushl	%ecx			/* push ls->next */
+	call 	rsum_list		/* rsum_list(ls->next) */
+	popl	%ecx			/* removes current ls */
+	addl 	%edx,%eax          	/* val += ls->val */
+	andl    %ecx,%ecx
+        je      End                     /* If no elements are found, jumps to End: */
+End:	 
+	popl	%edx
+	popl 	%ebp
+	ret
+
+	.pos 0x100
+
+Stack:
+	
+	

@@ -1,0 +1,63 @@
+
+/******** Dhrumil Patel ( Dpate85 ) ********/
+
+/* Framing up base pointer, stack pointer, source and dest */
+	.pos 0 /* Starts at address 0 */
+init:
+	irmovl Stack, %ebp
+	irmovl Stack, %esp
+	irmovl src, %edx
+	irmovl dest, %ecx
+        irmovl 3, %ebx         /* (len = 3)Reserves address for dest */
+	jmp Main
+
+/* Sample input to test the program */
+.align 4
+# Source block
+src:
+        .long 0x00a
+        .long 0x0b0
+        .long 0xc00
+# Destination block
+dest:
+        .long 0x111
+        .long 0x222
+        .long 0x333
+
+Main:
+	pushl %edx	       /* Push src */
+	pushl %ecx	       /* Push dest */
+	pushl %ebx	       /* Push (len = 3) */
+	call copy_block	       /* Invokes copy_block function */
+	halt		       /* Halts the program */
+
+copy_block:
+	pushl %ebp
+        xorl %eax,%eax         /* Sets result = 0 */
+	rrmovl %esp, %ebp
+	mrmovl 8(%ebp), %ebx   /* Stores length into ebx */
+	mrmovl 12(%ebp), %ecx  /* Stores dest into ecx */
+	mrmovl 16(%ebp), %edx  /* Stores src into edx */
+	andl %ebx, %ebx	       /* Checks if there are more than 0 elements */
+	jle End		       /* if no elements are found, jump to end */
+
+copy:
+	mrmovl (%edx),%esi	/* gets src */ 
+	rmmovl %esi,(%ecx)	/* stores the value of scr in dest*/	 
+	irmovl 4,%edi			
+        xorl %esi,%eax		/* result ˆ= val */
+	addl %edi,%edx		 
+	addl %edi,%ecx	
+	irmovl 1,%edi	          
+	subl %edi,%ebx          /* len-- */ 
+	jne copy                /* if len != 0, repeats copy: */
+	andl %ebx, %ebx
+        je    End               /* Terminates when len is 0 */
+ 
+End:	
+	rrmovl %ebp,%esp
+	popl %ebp 
+	ret 
+ 
+	.pos 0x100 
+Stack: 	
